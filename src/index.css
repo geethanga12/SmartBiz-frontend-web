@@ -1,0 +1,24 @@
+/* src/index.css */
+
+/* Add neutral background and center fonts */
+:root {
+  --app-bg: #f5f7fb;
+  --card-bg: #ffffff;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  background: var(--app-bg);
+}
+
+/* small responsive tweaks (the components use MUI sx for most) */
+a {
+  color: inherit;
+}
+
+/* Allow inputs to wrap nicely on mobile */
+input, button, textarea {
+  font-family: inherit;
+}
