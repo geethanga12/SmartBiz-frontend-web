@@ -46,13 +46,19 @@ export default function Login() {
       // Save token & simple user info (if you want)
       localStorage.setItem("user-token", token);
       localStorage.setItem("user-email", res.data.email || "");
-      localStorage.setItem("user-role", res.data.role || "");
+      localStorage.setItem("user-role", res.data.role || "OWNER");
 
-      setSnack({ open: true, severity: "success", msg: "Login successful" });
+      // ROLE-based redirect:
+      const role = res.data.role || "OWNER";
+      if (role === "ADMIN") {
+        navigate("/admin/dashboard", { replace: true });
+      } else {
+        // OWNER -> check business page will handle "no business" flow
+        navigate("/owner/dashboard", { replace: true });
+      }
 
-      // After login — per your instruction, don't create Dashboard now.
-      // Show a simple "logged in" page by navigating to root (App will render logged-in view)
-      navigate("/", { replace: true });
+      // setSnack({ open: true, severity: "success", msg: "Login successful" });
+      // navigate("/", { replace: true });
     } catch (err) {
       console.error(err);
       const msg =
