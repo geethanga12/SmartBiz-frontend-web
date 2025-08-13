@@ -6,20 +6,11 @@ import Register from "../pages/Register/Register";
 import OwnerDashboard from "../pages/Owner/OwnerDashboard";
 import RegisterBusiness from "../pages/Owner/RegisterBusiness";
 import AdminDashboard from "../pages/Admin/AdminDashboard";
+// import Products from "../pages/Owner/Products";
+import Products from "../pages/Owner/Products"; // New: Import Products page
 import ProtectedRoute from "../common/ProtectedRoute";
 import { CssBaseline, Box, CircularProgress } from "@mui/material";
 import instance from "../service/AxiosOrder";
-
-/*
-  App behavior:
-  - On mount, if token exists, validate it (GET /api/profile)
-  - If valid: role-based redirect
-    - ADMIN -> /admin/dashboard
-    - OWNER -> check GET /api/business/my
-        - has business -> /owner/dashboard
-        - no business -> /owner/register-business
-  - If invalid token -> clear storage and show auth routes
-*/
 
 export default function App() {
   const [checking, setChecking] = useState(true);
@@ -36,28 +27,23 @@ export default function App() {
       }
 
       try {
-        // validate token by calling protected profile endpoint
         await instance.get("/api/profile");
 
         const role = localStorage.getItem("user-role") || "OWNER";
 
-        // Only auto-redirect if user is on login/register/root
         const shouldAuto = ["/", "/login", "/register"].includes(location.pathname);
 
         if (role === "ADMIN") {
           if (shouldAuto) navigate("/admin/dashboard", { replace: true });
         } else {
-          // OWNER: check business existence
           try {
             await instance.get("/api/business/my");
             if (shouldAuto) navigate("/owner/dashboard", { replace: true });
           } catch (err) {
-            // if owner doesn't have business, redirect to register page
             if (shouldAuto) navigate("/owner/register-business", { replace: true });
           }
         }
       } catch (err) {
-        // invalid token -> clear storage and leave on login
         localStorage.removeItem("user-token");
         localStorage.removeItem("user-role");
         localStorage.removeItem("user-email");
@@ -106,6 +92,14 @@ export default function App() {
           element={
             <ProtectedRoute roles={["OWNER"]}>
               <RegisterBusiness />
+            </ProtectedRoute>
+          }
+        />
+        <Route  // New: Products route
+          path="/owner/products"
+          element={
+            <ProtectedRoute roles={["OWNER"]}>
+              <Products />
             </ProtectedRoute>
           }
         />

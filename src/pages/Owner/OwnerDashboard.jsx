@@ -18,7 +18,6 @@ export default function OwnerDashboard() {
         const res = await instance.get("/api/business/my");
         if (!canceled) setBusiness(res.data);
       } catch (err) {
-        // if no business (or 404), send owner to register page
         if (!canceled) {
           setBusiness(null);
           navigate("/owner/register-business", { replace: true });
@@ -54,7 +53,10 @@ export default function OwnerDashboard() {
           <Typography>Address: {business.address}</Typography>
           <Typography>Owner: {business.ownerEmail}</Typography>
           <Typography>Status: {business.status}</Typography>
-          {/* Expand this section with cards, quick actions, analytics later */}
+          {/* New: Link to Products */}
+          <Button variant="contained" sx={{ mt: 2 }} onClick={() => navigate("/owner/products")}>
+            Manage Products
+          </Button>
         </Paper>
       )}
     </DashboardLayout>
