@@ -18,6 +18,7 @@ export default function OwnerDashboard() {
         const res = await instance.get("/api/business/my");
         if (!canceled) setBusiness(res.data);
       } catch (err) {
+        console.error("Error fetching business", err);
         if (!canceled) {
           setBusiness(null);
           navigate("/owner/register-business", { replace: true });

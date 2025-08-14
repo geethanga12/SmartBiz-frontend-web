@@ -40,10 +40,12 @@ export default function App() {
             await instance.get("/api/business/my");
             if (shouldAuto) navigate("/owner/dashboard", { replace: true });
           } catch (err) {
+            console.error("No business found for owner", err);
             if (shouldAuto) navigate("/owner/register-business", { replace: true });
           }
         }
       } catch (err) {
+        console.error("Error checking user profile", err);
         localStorage.removeItem("user-token");
         localStorage.removeItem("user-role");
         localStorage.removeItem("user-email");
