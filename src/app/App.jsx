@@ -106,7 +106,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        {/* <Route  // New: Customers route
+        <Route  // New: Customers route
           path="/owner/customers"
           element={
             <ProtectedRoute roles={["OWNER"]}>
@@ -114,7 +114,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route  // New: Suppliers route
+        {/* <Route  // New: Suppliers route
           path="/owner/suppliers"
           element={
             <ProtectedRoute roles={["OWNER"]}>
