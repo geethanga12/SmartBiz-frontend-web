@@ -61,9 +61,9 @@ export default function OwnerDashboard() {
             <Button variant="contained" onClick={() => navigate("/owner/customers")}>
               Manage Customers
             </Button>
-            {/* <Button variant="contained" onClick={() => navigate("/owner/suppliers")}>
+            <Button variant="contained" onClick={() => navigate("/owner/suppliers")}>
               Manage Suppliers
-            </Button> */}
+            </Button>
           </Box>
         </Paper>
       )}

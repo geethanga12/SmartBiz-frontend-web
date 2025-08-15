@@ -114,14 +114,14 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        {/* <Route  // New: Suppliers route
+        <Route  // New: Suppliers route
           path="/owner/suppliers"
           element={
             <ProtectedRoute roles={["OWNER"]}>
               <Suppliers />
             </ProtectedRoute>
           }
-        /> */}
+        />
 
         {/* Admin routes */}
         <Route
