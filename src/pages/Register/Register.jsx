@@ -153,7 +153,8 @@ export default function Register() {
 
             <Stack
               direction="row"
-              justifyContent="space-between"
+              // justifyContent="space-between"
+              justifyContent="center"
               alignItems="center"
             >
               <Typography variant="body2">

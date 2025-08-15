@@ -149,7 +149,8 @@ export default function Login() {
 
             <Stack
               direction="row"
-              justifyContent="space-between"
+              // justifyContent="space-between"
+              justifyContent="center"
               alignItems="center"
             >
               <Typography variant="body2">

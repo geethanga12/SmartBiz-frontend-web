@@ -21,14 +21,17 @@ import HomeIcon from "@mui/icons-material/Home";
 import BusinessIcon from "@mui/icons-material/Business";
 import PeopleIcon from "@mui/icons-material/People";
 import SettingsIcon from "@mui/icons-material/Settings";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 220;
 
 const iconForName = (name) => {
   if (/business/i.test(name)) return <BusinessIcon />;
-  if (/product|prod/i.test(name)) return <HomeIcon />;
+  // if (/product|prod/i.test(name)) return <HomeIcon />;
+  if (/products/i.test(name)) return <BusinessIcon />;
   if (/customer|user|people/i.test(name)) return <PeopleIcon />;
+  if (/suppliers/i.test(name)) return <PeopleIcon />;
   if (/setting/i.test(name)) return <SettingsIcon />;
   return <HomeIcon />;
 };
@@ -36,7 +39,7 @@ const iconForName = (name) => {
 export default function DashboardLayout({ title = "Dashboard", menu = [], children }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(true);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const userEmail = localStorage.getItem("user-email") || "";
 
   const logout = () => {

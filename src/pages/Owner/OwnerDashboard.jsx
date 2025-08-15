@@ -18,7 +18,7 @@ export default function OwnerDashboard() {
         const res = await instance.get("/api/business/my");
         if (!canceled) setBusiness(res.data);
       } catch (err) {
-        console.error("Error fetching business", err);
+        console.error("Failed to fetch business:", err);
         if (!canceled) {
           setBusiness(null);
           navigate("/owner/register-business", { replace: true });
@@ -54,10 +54,17 @@ export default function OwnerDashboard() {
           <Typography>Address: {business.address}</Typography>
           <Typography>Owner: {business.ownerEmail}</Typography>
           <Typography>Status: {business.status}</Typography>
-          {/* New: Link to Products */}
-          <Button variant="contained" sx={{ mt: 2 }} onClick={() => navigate("/owner/products")}>
-            Manage Products
-          </Button>
+          <Box sx={{ mt: 2, display: "flex", gap: 2 }}>
+            <Button variant="contained" onClick={() => navigate("/owner/products")}>
+              Manage Products
+            </Button>
+            {/* <Button variant="contained" onClick={() => navigate("/owner/customers")}>
+              Manage Customers
+            </Button>
+            <Button variant="contained" onClick={() => navigate("/owner/suppliers")}>
+              Manage Suppliers
+            </Button> */}
+          </Box>
         </Paper>
       )}
     </DashboardLayout>

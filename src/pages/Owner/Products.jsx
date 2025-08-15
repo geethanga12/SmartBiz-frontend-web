@@ -12,15 +12,10 @@ import {
   Select,
   MenuItem,
   IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
+  Grid,
 } from "@mui/material";
-import { Add, Edit, Delete } from "@mui/icons-material";
+import { DataGrid } from "@mui/x-data-grid"; // Updated: Imported DataGrid
+import { Add, Edit, Delete, Search } from "@mui/icons-material";
 import instance from "../../service/AxiosOrder";
 import DashboardLayout from "../../common/DashboardLayout";
 import { ownerMenu } from "../../common/navigation/ownerRoutes";
@@ -39,6 +34,8 @@ export default function Products() {
     unitPrice: 0,
     quantity: 0,
   });
+  const [searchId, setSearchId] = useState("");
+  const [searchName, setSearchName] = useState("");
 
   useEffect(() => {
     fetchSuppliers();
@@ -64,6 +61,34 @@ export default function Products() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearchById = async () => {
+    if (!searchId) return;
+    try {
+      const res = await instance.get(`/api/v1/item/${searchId}`);
+      setItems([res.data]); // Updated: Set to search result
+    } catch (err) {
+      console.error("Failed to fetch item by ID:", err);
+      setItems([]);
+    }
+  };
+
+  const handleSearchByName = async () => {
+    if (!searchName) return;
+    try {
+      const res = await instance.get(`/api/v1/item/get_by_name/${searchName}`);
+      setItems([res.data]); // Updated: Set to search result
+    } catch (err) {
+      console.error("Failed to fetch item by name:", err);
+      setItems([]);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchId("");
+    setSearchName("");
+    fetchItems(); // Updated: Refresh all items
   };
 
   const handleOpenAddEdit = (item = { id: null, supplierId: null, name: "", description: "", unitPrice: 0, quantity: 0 }) => {
@@ -103,6 +128,26 @@ export default function Products() {
     }
   };
 
+  const columns = [
+    { field: "id", headerName: "ID", width: 90 },
+    { field: "name", headerName: "Name", width: 150 },
+    { field: "description", headerName: "Description", width: 200 },
+    { field: "unitPrice", headerName: "Unit Price", width: 120 },
+    { field: "quantity", headerName: "Quantity", width: 120 },
+    { field: "supplierId", headerName: "Supplier ID", width: 120 },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 150,
+      renderCell: (params) => (
+        <>
+          <IconButton onClick={() => handleOpenAddEdit(params.row)}><Edit /></IconButton>
+          <IconButton onClick={() => handleDelete(params.row.id)}><Delete /></IconButton>
+        </>
+      ),
+    },
+  ];
+
   return (
     <DashboardLayout title="Products" menu={ownerMenu}>
       <Box sx={{ p: 2 }}>
@@ -112,96 +157,63 @@ export default function Products() {
             Add Product
           </Button>
         </Box>
-        {loading ? (
-          <Typography>Loading...</Typography>
-        ) : (
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell>Unit Price</TableCell>
-                  <TableCell>Quantity</TableCell>
-                  <TableCell>Supplier ID</TableCell>
-                  <TableCell>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {items.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{item.id}</TableCell>
-                    <TableCell>{item.name}</TableCell>
-                    <TableCell>{item.description}</TableCell>
-                    <TableCell>{item.unitPrice}</TableCell>
-                    <TableCell>{item.quantity}</TableCell>
-                    <TableCell>{item.supplierId || "None"}</TableCell>
-                    <TableCell>
-                      <IconButton onClick={() => handleOpenAddEdit(item)}>
-                        <Edit />
-                      </IconButton>
-                      <IconButton onClick={() => handleDelete(item.id)}>
-                        <Delete />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
+
+        {/* Improved Search UI */}
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid item xs={12} sm={5}>
+            <TextField
+              label="Search by ID"
+              value={searchId}
+              onChange={(e) => setSearchId(e.target.value)}
+              fullWidth
+              type="number"
+            />
+          </Grid>
+          <Grid item xs={12} sm={2}>
+            <Button variant="outlined" startIcon={<Search />} onClick={handleSearchById} fullWidth>
+              Search ID
+            </Button>
+          </Grid>
+          <Grid item xs={12} sm={5}>
+            <TextField
+              label="Search by Name"
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={12} sm={2}>
+            <Button variant="outlined" startIcon={<Search />} onClick={handleSearchByName} fullWidth>
+              Search Name
+            </Button>
+          </Grid>
+          <Grid item xs={12} sm={2}>
+            <Button variant="text" onClick={clearSearch} fullWidth>
+              Clear Search
+            </Button>
+          </Grid>
+        </Grid>
+
+        <Box sx={{ height: 400, width: "100%" }}>
+          <DataGrid
+            rows={items}
+            columns={columns}
+            pageSizeOptions={[5, 10]}
+            loading={loading}
+            disableRowSelectionOnClick
+          />
+        </Box>
       </Box>
 
       {/* Add/Edit Dialog */}
       <Dialog open={openAddEdit} onClose={handleCloseAddEdit}>
         <DialogTitle>{isEdit ? "Edit Product" : "Add Product"}</DialogTitle>
         <DialogContent>
-          <TextField
-            name="name"
-            label="Name"
-            value={currentItem.name}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
-          <TextField
-            name="description"
-            label="Description"
-            value={currentItem.description}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            name="unitPrice"
-            label="Unit Price"
-            type="number"
-            value={currentItem.unitPrice}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
-          <TextField
-            name="quantity"
-            label="Quantity"
-            type="number"
-            value={currentItem.quantity}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
-          <Select
-            name="supplierId"
-            value={currentItem.supplierId || ""}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            displayEmpty
-          >
+          <TextField name="name" label="Name" value={currentItem.name} onChange={handleChange} fullWidth margin="normal" required />
+          <TextField name="description" label="Description" value={currentItem.description} onChange={handleChange} fullWidth margin="normal" />
+          <TextField name="unitPrice" label="Unit Price" type="number" value={currentItem.unitPrice} onChange={handleChange} fullWidth margin="normal" required />
+          <TextField name="quantity" label="Quantity" type="number" value={currentItem.quantity} onChange={handleChange} fullWidth margin="normal" required />
+          <Select name="supplierId" value={currentItem.supplierId || ""} onChange={handleChange} fullWidth margin="normal" displayEmpty>
             <MenuItem value=""><em>None</em></MenuItem>
             {suppliers.map((s) => (
               <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>
@@ -210,9 +222,7 @@ export default function Products() {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseAddEdit}>Cancel</Button>
-          <Button onClick={handleSave} variant="contained">
-            Save
-          </Button>
+          <Button onClick={handleSave} variant="contained">Save</Button>
         </DialogActions>
       </Dialog>
     </DashboardLayout>
