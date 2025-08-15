@@ -3,7 +3,7 @@
 export const ownerMenu = [
   { path: "/owner/dashboard", name: "Overview" },
   { path: "/owner/products", name: "Products" },
-  // { path: "/owner/customers", name: "Customers" }, // New: Added customers path
+  { path: "/owner/customers", name: "Customers" }, // New: Added customers path
   // { path: "/owner/suppliers", name: "Suppliers" }, // New: Added suppliers path
   { path: "/owner/settings", name: "Settings" },
 ];
