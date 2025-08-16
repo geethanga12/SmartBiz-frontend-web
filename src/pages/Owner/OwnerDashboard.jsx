@@ -41,8 +41,13 @@ export default function OwnerDashboard() {
       {!business ? (
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6">No business found</Typography>
-          <Typography sx={{ mb: 2 }}>You don't have a registered business yet.</Typography>
-          <Button variant="contained" onClick={() => navigate("/owner/register-business")}>
+          <Typography sx={{ mb: 2 }}>
+            You don't have a registered business yet.
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={() => navigate("/owner/register-business")}
+          >
             Register My Business
           </Button>
         </Paper>
@@ -55,14 +60,29 @@ export default function OwnerDashboard() {
           <Typography>Owner: {business.ownerEmail}</Typography>
           <Typography>Status: {business.status}</Typography>
           <Box sx={{ mt: 2, display: "flex", gap: 2 }}>
-            <Button variant="contained" onClick={() => navigate("/owner/products")}>
+            <Button
+              variant="contained"
+              onClick={() => navigate("/owner/products")}
+            >
               Manage Products
             </Button>
-            <Button variant="contained" onClick={() => navigate("/owner/customers")}>
+            <Button
+              variant="contained"
+              onClick={() => navigate("/owner/customers")}
+            >
               Manage Customers
             </Button>
-            <Button variant="contained" onClick={() => navigate("/owner/suppliers")}>
+            <Button
+              variant="contained"
+              onClick={() => navigate("/owner/suppliers")}
+            >
               Manage Suppliers
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => navigate("/owner/employees")}
+            >
+              Manage Employees
             </Button>
           </Box>
         </Paper>

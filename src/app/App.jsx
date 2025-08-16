@@ -1,6 +1,12 @@
 // src/app/App.jsx
 import React, { useEffect, useState } from "react";
-import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import OwnerDashboard from "../pages/Owner/OwnerDashboard";
@@ -9,6 +15,7 @@ import AdminDashboard from "../pages/Admin/AdminDashboard";
 import Products from "../pages/Owner/Products";
 import Customers from "../pages/Owner/Customers"; // New: Import Customers
 import Suppliers from "../pages/Owner/Suppliers"; // New: Import Suppliers
+import Employees from "../pages/Owner/Employees"; // New: Import Employees
 import ProtectedRoute from "../common/ProtectedRoute";
 import { CssBaseline, Box, CircularProgress } from "@mui/material";
 import instance from "../service/AxiosOrder";
@@ -32,7 +39,9 @@ export default function App() {
 
         const role = localStorage.getItem("user-role") || "OWNER";
 
-        const shouldAuto = ["/", "/login", "/register"].includes(location.pathname);
+        const shouldAuto = ["/", "/login", "/register"].includes(
+          location.pathname
+        );
 
         if (role === "ADMIN") {
           if (shouldAuto) navigate("/admin/dashboard", { replace: true });
@@ -42,7 +51,8 @@ export default function App() {
             if (shouldAuto) navigate("/owner/dashboard", { replace: true });
           } catch (err) {
             console.error("No business found for owner", err);
-            if (shouldAuto) navigate("/owner/register-business", { replace: true });
+            if (shouldAuto)
+              navigate("/owner/register-business", { replace: true });
           }
         }
       } catch (err) {
@@ -50,7 +60,8 @@ export default function App() {
         localStorage.removeItem("user-token");
         localStorage.removeItem("user-role");
         localStorage.removeItem("user-email");
-        if (location.pathname !== "/login") navigate("/login", { replace: true });
+        if (location.pathname !== "/login")
+          navigate("/login", { replace: true });
       } finally {
         if (mounted) setChecking(false);
       }
@@ -66,7 +77,14 @@ export default function App() {
     return (
       <>
         <CssBaseline />
-        <Box sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Box
+          sx={{
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <CircularProgress />
         </Box>
       </>
@@ -106,7 +124,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route  // New: Customers route
+        <Route // New: Customers route
           path="/owner/customers"
           element={
             <ProtectedRoute roles={["OWNER"]}>
@@ -114,11 +132,19 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route  // New: Suppliers route
+        <Route // New: Suppliers route
           path="/owner/suppliers"
           element={
             <ProtectedRoute roles={["OWNER"]}>
               <Suppliers />
+            </ProtectedRoute>
+          }
+        />
+        <Route // New: Employees route
+          path="/owner/employees"
+          element={
+            <ProtectedRoute roles={["OWNER"]}>
+              <Employees />
             </ProtectedRoute>
           }
         />
@@ -138,7 +164,6 @@ export default function App() {
     </>
   );
 }
-
 
 // // src/app/App.jsx
 // import React, { useEffect, useState } from "react";
