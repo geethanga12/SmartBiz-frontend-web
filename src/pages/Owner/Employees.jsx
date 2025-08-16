@@ -9,8 +9,6 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
-  Select,
-  MenuItem,
   IconButton,
   Grid,
 } from "@mui/material";
@@ -66,9 +64,7 @@ export default function Employees() {
   const handleSearchByEmail = async () => {
     if (!searchEmail) return;
     try {
-      const res = await instance.get(
-        `/api/v1/employee/get_by_email/${searchEmail}`
-      );
+      const res = await instance.get(`/api/v1/employee/get_by_email/${searchEmail}`);
       setEmployees([res.data]);
     } catch (err) {
       console.error("Failed to fetch employee by email:", err);
@@ -82,16 +78,7 @@ export default function Employees() {
     fetchEmployees();
   };
 
-  const handleOpenAddEdit = (
-    employee = {
-      id: null,
-      name: "",
-      password: "",
-      role: "",
-      salary: 0,
-      email: "",
-    }
-  ) => {
+  const handleOpenAddEdit = (employee = { id: null, name: "", password: "", role: "", salary: 0, email: "" }) => {
     setCurrentEmployee(employee);
     setIsEdit(!!employee.id);
     setOpenAddEdit(true);
@@ -108,10 +95,7 @@ export default function Employees() {
   const handleSave = async () => {
     try {
       if (isEdit) {
-        await instance.put(
-          `/api/v1/employee/${currentEmployee.id}`,
-          currentEmployee
-        );
+        await instance.put(`/api/v1/employee/${currentEmployee.id}`, currentEmployee);
       } else {
         await instance.post("/api/v1/employee", currentEmployee);
       }
@@ -135,8 +119,6 @@ export default function Employees() {
     { field: "id", headerName: "ID", width: 90 },
     { field: "name", headerName: "Name", width: 150 },
     { field: "email", headerName: "Email", width: 200 },
-    { field: "phone", headerName: "Phone", width: 150 },
-    { field: "address", headerName: "Address", width: 200 },
     { field: "role", headerName: "Role", width: 120 },
     { field: "salary", headerName: "Salary", width: 120 },
     {
@@ -145,12 +127,8 @@ export default function Employees() {
       width: 150,
       renderCell: (params) => (
         <>
-          <IconButton onClick={() => handleOpenAddEdit(params.row)}>
-            <Edit />
-          </IconButton>
-          <IconButton onClick={() => handleDelete(params.row.id)}>
-            <Delete />
-          </IconButton>
+          <IconButton onClick={() => handleOpenAddEdit(params.row)}><Edit /></IconButton>
+          <IconButton onClick={() => handleDelete(params.row.id)}><Delete /></IconButton>
         </>
       ),
     },
@@ -161,11 +139,7 @@ export default function Employees() {
       <Box sx={{ p: 2 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
           <Typography variant="h6">Employee Management</Typography>
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => handleOpenAddEdit()}
-          >
+          <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenAddEdit()}>
             Add Employee
           </Button>
         </Box>
@@ -181,12 +155,7 @@ export default function Employees() {
             />
           </Grid>
           <Grid item xs={12} sm={2}>
-            <Button
-              variant="outlined"
-              startIcon={<Search />}
-              onClick={handleSearchById}
-              fullWidth
-            >
+            <Button variant="outlined" startIcon={<Search />} onClick={handleSearchById} fullWidth>
               Search ID
             </Button>
           </Grid>
@@ -199,12 +168,7 @@ export default function Employees() {
             />
           </Grid>
           <Grid item xs={12} sm={2}>
-            <Button
-              variant="outlined"
-              startIcon={<Search />}
-              onClick={handleSearchByEmail}
-              fullWidth
-            >
+            <Button variant="outlined" startIcon={<Search />} onClick={handleSearchByEmail} fullWidth>
               Search Email
             </Button>
           </Grid>
@@ -229,58 +193,15 @@ export default function Employees() {
       <Dialog open={openAddEdit} onClose={handleCloseAddEdit}>
         <DialogTitle>{isEdit ? "Edit Employee" : "Add Employee"}</DialogTitle>
         <DialogContent>
-          <TextField
-            name="name"
-            label="Name"
-            value={currentEmployee.name}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
-          <TextField
-            name="email"
-            label="Email"
-            value={currentEmployee.email}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
-          <TextField
-            name="password"
-            label="Password"
-            type="password"
-            value={currentEmployee.password}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required={!isEdit}
-          />
-          <TextField
-            name="role"
-            label="Role"
-            value={currentEmployee.role}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
-          <TextField
-            name="salary"
-            label="Salary"
-            type="number"
-            value={currentEmployee.salary}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-          />
+          <TextField name="name" label="Name" value={currentEmployee.name} onChange={handleChange} fullWidth margin="normal" required />
+          <TextField name="email" label="Email" value={currentEmployee.email} onChange={handleChange} fullWidth margin="normal" required />
+          <TextField name="password" label="Password" type="password" value={currentEmployee.password} onChange={handleChange} fullWidth margin="normal" required={!isEdit} />
+          <TextField name="role" label="Role" value={currentEmployee.role} onChange={handleChange} fullWidth margin="normal" required />
+          <TextField name="salary" label="Salary" type="number" value={currentEmployee.salary} onChange={handleChange} fullWidth margin="normal" />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseAddEdit}>Cancel</Button>
-          <Button onClick={handleSave} variant="contained">
-            Save
-          </Button>
+          <Button onClick={handleSave} variant="contained">Save</Button>
         </DialogActions>
       </Dialog>
     </DashboardLayout>
