@@ -1,92 +1,122 @@
-// src/pages/Owner/OwnerDashboard.jsx
 import React, { useEffect, useState } from "react";
-import { Box, Typography, Paper, Button } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Grow,
+} from "@mui/material";
+import { AttachMoney, Inventory, TrendingUp, MoneyOff } from "@mui/icons-material";
+import { BarChart } from "@mui/x-charts/BarChart";
 import instance from "../../service/AxiosOrder";
-import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../common/DashboardLayout";
 import { ownerMenu } from "../../common/navigation/ownerRoutes";
 
+const formatCurrency = (value) => new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(value);
+
 export default function OwnerDashboard() {
-  const [business, setBusiness] = useState(null);
+  const [overview, setOverview] = useState({
+    sales: 0,
+    inventoryValue: 0,
+    profits: 0,
+    expenses: 0,
+  });
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    let canceled = false;
-    const fetchBusiness = async () => {
-      try {
-        const res = await instance.get("/api/business/my");
-        if (!canceled) setBusiness(res.data);
-      } catch (err) {
-        console.error("Failed to fetch business:", err);
-        if (!canceled) {
-          setBusiness(null);
-          navigate("/owner/register-business", { replace: true });
-        }
-      } finally {
-        if (!canceled) setLoading(false);
-      }
-    };
+    fetchOverview();
+  }, []);
 
-    fetchBusiness();
-    return () => {
-      canceled = true;
-    };
-  }, [navigate]);
+  const fetchOverview = async () => {
+    try {
+      const res = await instance.get("/api/v1/dashboard/overview");
+      setOverview(res.data);
+    } catch (err) {
+      console.error("Failed to fetch overview", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  if (loading) return <Typography sx={{ p: 3 }}>Loading...</Typography>;
+  if (loading) {
+    return (
+      <DashboardLayout title="Owner Dashboard" menu={ownerMenu}>
+        <Box sx={{ p: { xs: 2, md: 3 }, textAlign: "center" }}>
+          <Typography>Loading overview...</Typography>
+        </Box>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="Owner Dashboard" menu={ownerMenu}>
-      {!business ? (
-        <Paper sx={{ p: 3 }}>
-          <Typography variant="h6">No business found</Typography>
-          <Typography sx={{ mb: 2 }}>
-            You don't have a registered business yet.
+      <Grow in timeout={500}>
+        <Box sx={{ p: { xs: 2, md: 3 }, bgcolor: "#f9fafb", borderRadius: 2 }}>
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", color: "#1976d2" }}>
+            Business Overview
           </Typography>
-          <Button
-            variant="contained"
-            onClick={() => navigate("/owner/register-business")}
-          >
-            Register My Business
-          </Button>
-        </Paper>
-      ) : (
-        <Paper sx={{ p: 3 }}>
-          <Typography variant="h5" sx={{ mb: 1 }}>
-            {business.businessName}
-          </Typography>
-          <Typography>Address: {business.address}</Typography>
-          <Typography>Owner: {business.ownerEmail}</Typography>
-          <Typography>Status: {business.status}</Typography>
-          <Box sx={{ mt: 2, display: "flex", gap: 2 }}>
-            <Button
-              variant="contained"
-              onClick={() => navigate("/owner/products")}
-            >
-              Manage Products
-            </Button>
-            <Button
-              variant="contained"
-              onClick={() => navigate("/owner/customers")}
-            >
-              Manage Customers
-            </Button>
-            <Button
-              variant="contained"
-              onClick={() => navigate("/owner/suppliers")}
-            >
-              Manage Suppliers
-            </Button>
-            <Button
-              variant="contained"
-              onClick={() => navigate("/owner/employees")}
-            >
-              Manage Employees
-            </Button>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card elevation={3} sx={{ borderRadius: 2, bgcolor: "#e3f2fd" }}>
+                <CardContent sx={{ display: "flex", alignItems: "center" }}>
+                  <AttachMoney sx={{ fontSize: 40, color: "#1976d2", mr: 2 }} />
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">Sales</Typography>
+                    <Typography variant="h5" sx={{ fontWeight: "bold" }}>{formatCurrency(overview.sales)}</Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card elevation={3} sx={{ borderRadius: 2, bgcolor: "#e8f5e9" }}>
+                <CardContent sx={{ display: "flex", alignItems: "center" }}>
+                  <Inventory sx={{ fontSize: 40, color: "#4caf50", mr: 2 }} />
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">Inventory Value</Typography>
+                    <Typography variant="h5" sx={{ fontWeight: "bold" }}>{formatCurrency(overview.inventoryValue)}</Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card elevation={3} sx={{ borderRadius: 2, bgcolor: "#fff3e0" }}>
+                <CardContent sx={{ display: "flex", alignItems: "center" }}>
+                  <TrendingUp sx={{ fontSize: 40, color: "#ff9800", mr: 2 }} />
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">Profits</Typography>
+                    <Typography variant="h5" sx={{ fontWeight: "bold" }}>{formatCurrency(overview.profits)}</Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card elevation={3} sx={{ borderRadius: 2, bgcolor: "#ffebee" }}>
+                <CardContent sx={{ display: "flex", alignItems: "center" }}>
+                  <MoneyOff sx={{ fontSize: 40, color: "#f44336", mr: 2 }} />
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">Expenses</Typography>
+                    <Typography variant="h5" sx={{ fontWeight: "bold" }}>{formatCurrency(overview.expenses)}</Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+
+          <Box sx={{ mt: 4, p: 2, bgcolor: "#fff", borderRadius: 2, boxShadow: 1 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+              Daily Metrics
+            </Typography>
+            <BarChart
+              xAxis={[{ scaleType: "band", data: ["Sales", "Expenses", "Profits"] }]}
+              series={[{ data: [overview.sales, overview.expenses, overview.profits], color: "#1976d2" }]}
+              width={500}
+              height={300}
+              sx={{ "& .MuiChartsAxis-label": { fill: "#333" } }}
+            />
           </Box>
-        </Paper>
-      )}
+        </Box>
+      </Grow>
     </DashboardLayout>
   );
 }
