@@ -16,6 +16,11 @@ import Products from "../pages/Owner/Products";
 import Customers from "../pages/Owner/Customers"; // New: Import Customers
 import Suppliers from "../pages/Owner/Suppliers"; // New: Import Suppliers
 import Employees from "../pages/Owner/Employees"; // New: Import Employees
+
+import Sales from "../pages/Owner/Sales"; // New: Import Sales
+import Invoices from "../pages/Owner/Invoices"; // New: Import Invoices
+import Expenses from "../pages/Owner/Expenses"; // New: Import Expenses
+
 import ProtectedRoute from "../common/ProtectedRoute";
 import { CssBaseline, Box, CircularProgress } from "@mui/material";
 import instance from "../service/AxiosOrder";
@@ -145,6 +150,33 @@ export default function App() {
           element={
             <ProtectedRoute roles={["OWNER"]}>
               <Employees />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route // New: Sales route
+          path="/owner/sales"
+          element={
+            <ProtectedRoute roles={["OWNER"]}>
+              <Sales />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route // New: Invoices route
+          path="/owner/invoices"
+          element={
+            <ProtectedRoute roles={["OWNER"]}>
+              <Invoices />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route // New: Expenses route
+          path="/owner/expenses"
+          element={
+            <ProtectedRoute roles={["OWNER"]}>
+              <Expenses />
             </ProtectedRoute>
           }
         />
