@@ -21,6 +21,10 @@ import Sales from "../pages/Owner/Sales"; // New: Import Sales
 import Invoices from "../pages/Owner/Invoices"; // New: Import Invoices
 import Expenses from "../pages/Owner/Expenses"; // New: Import Expenses
 
+import AIFeatures from "../pages/Owner/AIFeatures";
+import Reports from "../pages/Owner/Reports";
+import BusinessManagement from "../pages/Admin/BusinessManagement";
+
 import ProtectedRoute from "../common/ProtectedRoute";
 import { CssBaseline, Box, CircularProgress } from "@mui/material";
 import instance from "../service/AxiosOrder";
@@ -181,7 +185,35 @@ export default function App() {
           }
         />
 
+        <Route
+          path="/owner/ai-features"
+          element={
+            <ProtectedRoute roles={["OWNER"]}>
+              <AIFeatures />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/owner/reports"
+          element={
+            <ProtectedRoute roles={["OWNER"]}>
+              <Reports />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Admin routes */}
+
+        <Route
+          path="/admin/businesses"
+          element={
+            <ProtectedRoute roles={["ADMIN"]}>
+              <BusinessManagement />
+            </ProtectedRoute>
+          }
+        />
+        
         <Route
           path="/admin/dashboard"
           element={
