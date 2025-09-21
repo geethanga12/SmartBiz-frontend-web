@@ -1,25 +1,13 @@
+// src/pages/Owner/Invoices.jsx
 import React, { useEffect, useState } from "react";
 import {
-  Box,
-  Typography,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogActions,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Button,
-  IconButton,
-  Grow,
+  Box, Typography, Dialog, DialogContent, DialogTitle, DialogActions,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Paper, Button, IconButton, Grow, Grid, CircularProgress
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { Visibility, Download } from "@mui/icons-material";
-import instance from "../../service/AxiosOrder";
+import instance from "../../service/AxiosOrder"; // adjust path if needed
 import DashboardLayout from "../../common/DashboardLayout";
 import { ownerMenu } from "../../common/navigation/ownerRoutes";
 
@@ -30,6 +18,8 @@ export default function Invoices() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [open, setOpen] = useState(false);
+  const [downloadLoadingId, setDownloadLoadingId] = useState(null);
+  const [viewLoadingId, setViewLoadingId] = useState(null);
 
   useEffect(() => {
     fetchInvoices();
@@ -39,7 +29,9 @@ export default function Invoices() {
     setLoading(true);
     try {
       const res = await instance.get("/api/v1/order");
-      setInvoices(res.data || []);
+      // Ensure each row has `id` for DataGrid
+      const rows = (res.data || []).map(o => ({ ...o, id: o.id || o.orderId }));
+      setInvoices(rows);
     } catch (err) {
       console.error("Failed to fetch invoices:", err);
     } finally {
@@ -47,15 +39,43 @@ export default function Invoices() {
     }
   };
 
-  const handleView = (id) => {
-    const inv = invoices.find((i) => i.id === id);
-    setSelected(inv);
-    setOpen(true);
+  // View: fetch full order details then open dialog
+  const handleView = async (id) => {
+    try {
+      setViewLoadingId(id);
+      // backend GET /api/v1/order/{id}
+      const res = await instance.get(`/api/v1/order/${id}`);
+      setSelected(res.data);
+      setOpen(true);
+    } catch (err) {
+      console.error("Failed to fetch invoice details:", err);
+    } finally {
+      setViewLoadingId(null);
+    }
   };
 
-  const handleDownload = (id) => {
-    console.log("Download invoice", id);
-    // Implement download logic (e.g., generate PDF via API)
+  // Download PDF from backend invoice endpoint
+  const handleDownload = async (id) => {
+    if (!id) return;
+    try {
+      setDownloadLoadingId(id);
+      const response = await instance.get(`/api/v1/order/${id}/pdf`, {
+        responseType: "blob"
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `invoice_${id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to download invoice PDF:", err);
+    } finally {
+      setDownloadLoadingId(null);
+    }
   };
 
   const columns = [
@@ -66,11 +86,15 @@ export default function Invoices() {
     {
       field: "actions",
       headerName: "Actions",
-      width: 150,
+      width: 160,
       renderCell: (params) => (
         <>
-          <IconButton onClick={() => handleView(params.row.id)} color="primary" aria-label="view invoice"><Visibility /></IconButton>
-          <IconButton onClick={() => handleDownload(params.row.id)} color="secondary" aria-label="download invoice"><Download /></IconButton>
+          <IconButton onClick={() => handleView(params.row.id)} color="primary" aria-label="view invoice">
+            {viewLoadingId === params.row.id ? <CircularProgress size={20} /> : <Visibility />}
+          </IconButton>
+          <IconButton onClick={() => handleDownload(params.row.id)} color="secondary" aria-label="download invoice">
+            {downloadLoadingId === params.row.id ? <CircularProgress size={20} /> : <Download />}
+          </IconButton>
         </>
       ),
     },
@@ -101,7 +125,7 @@ export default function Invoices() {
                     zIndex: 1,
                   },
                   "& .MuiDataGrid-row:hover": { bgcolor: "#e3f2fd" },
-                  "& .MuiDataGrid-cell": { py: 1.5 },
+                  "& .MuiDataGrid-cell": { py: 1.2 },
                   borderRadius: 2,
                 }}
               />
@@ -113,12 +137,19 @@ export default function Invoices() {
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle sx={{ bgcolor: "#1976d2", color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           Invoice Details #{selected?.id}
-          <Button variant="contained" color="secondary" startIcon={<Download />} onClick={() => handleDownload(selected?.id)} size="small" aria-label="download invoice">
-            Download
+          <Button
+            variant="contained"
+            color="secondary"
+            startIcon={<Download />}
+            onClick={() => handleDownload(selected?.id)}
+            size="small"
+            aria-label="download invoice"
+          >
+            {downloadLoadingId === selected?.id ? <CircularProgress size={18} /> : "Download"}
           </Button>
         </DialogTitle>
         <DialogContent>
-          {selected && (
+          {selected ? (
             <Box sx={{ p: 2 }}>
               <Grid container spacing={2} sx={{ mb: 2 }}>
                 <Grid item xs={12} sm={6}>
@@ -131,14 +162,15 @@ export default function Invoices() {
                   <Typography><strong>Status:</strong> {selected.status}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Typography><strong>Customer ID:</strong> {selected.customerId}</Typography>
+                  <Typography><strong>Customer:</strong> {selected.customer?.customerName || selected.customerId}</Typography>
                 </Grid>
               </Grid>
+
               <TableContainer component={Paper} sx={{ boxShadow: 1, borderRadius: 2 }}>
                 <Table>
                   <TableHead sx={{ bgcolor: "#f5f5f5" }}>
                     <TableRow>
-                      <TableCell sx={{ fontWeight: "bold" }}>Item ID</TableCell>
+                      <TableCell sx={{ fontWeight: "bold" }}>Item</TableCell>
                       <TableCell sx={{ fontWeight: "bold" }}>Quantity</TableCell>
                       <TableCell sx={{ fontWeight: "bold" }}>Price</TableCell>
                       <TableCell sx={{ fontWeight: "bold" }}>Discount</TableCell>
@@ -148,16 +180,20 @@ export default function Invoices() {
                   <TableBody>
                     {selected.details?.map((d, idx) => (
                       <TableRow key={idx}>
-                        <TableCell>{d.itemId}</TableCell>
+                        <TableCell>{d.itemName || d.itemId}</TableCell>
                         <TableCell>{d.quantity}</TableCell>
                         <TableCell>{formatCurrency(d.price)}</TableCell>
-                        <TableCell>{formatCurrency(d.discount)}</TableCell>
-                        <TableCell>{formatCurrency(d.quantity * d.price - d.discount)}</TableCell>
+                        <TableCell>{formatCurrency(d.discount || 0)}</TableCell>
+                        <TableCell>{formatCurrency((d.quantity * d.price) - (d.discount || 0))}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               </TableContainer>
+            </Box>
+          ) : (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+              <CircularProgress />
             </Box>
           )}
         </DialogContent>

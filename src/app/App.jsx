@@ -29,6 +29,8 @@ import ProtectedRoute from "../common/ProtectedRoute";
 import { CssBaseline, Box, CircularProgress } from "@mui/material";
 import instance from "../service/AxiosOrder";
 
+import SubscriptionPlans from "../pages/Admin/SubscriptionPlans";
+
 export default function App() {
   const [checking, setChecking] = useState(true);
   const navigate = useNavigate();
@@ -204,6 +206,15 @@ export default function App() {
         />
 
         {/* Admin routes */}
+
+        <Route
+          path="/admin/subscription-plans"
+          element={
+            <ProtectedRoute roles={["ADMIN"]}>
+              <SubscriptionPlans />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/admin/businesses"

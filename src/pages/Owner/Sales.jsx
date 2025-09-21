@@ -22,7 +22,10 @@ import instance from "../../service/AxiosOrder";
 import DashboardLayout from "../../common/DashboardLayout";
 import { ownerMenu } from "../../common/navigation/ownerRoutes";
 
-const formatCurrency = (value) => new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(value);
+const formatCurrency = (value) =>
+  new Intl.NumberFormat("en-LK", { style: "currency", currency: "LKR" }).format(
+    value
+  );
 
 export default function Sales() {
   const [form, setForm] = useState({
@@ -35,9 +38,18 @@ export default function Sales() {
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [snack, setSnack] = useState({ open: false, severity: "info", msg: "" });
+  const [snack, setSnack] = useState({
+    open: false,
+    severity: "info",
+    msg: "",
+  });
   const [openCustomerDialog, setOpenCustomerDialog] = useState(false);
-  const [newCustomer, setNewCustomer] = useState({ name: "", email: "", phone: "", address: "" });
+  const [newCustomer, setNewCustomer] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+  });
 
   useEffect(() => {
     fetchData();
@@ -51,9 +63,19 @@ export default function Sales() {
         instance.get("/api/v1/employee"),
         instance.get("/api/v1/item"),
       ]);
-      setCustomers(custRes.data.map(c => ({ label: `${c.name} (${c.email})`, id: c.id })));
-      setEmployees(empRes.data.map(e => ({ label: `${e.name} (${e.role})`, id: e.id })));
-      setItems(itemRes.data.map(i => ({ label: `${i.name} (${formatCurrency(i.unitPrice)})`, id: i.id, unitPrice: i.unitPrice })));
+      setCustomers(
+        custRes.data.map((c) => ({ label: `${c.name} (${c.email})`, id: c.id }))
+      );
+      setEmployees(
+        empRes.data.map((e) => ({ label: `${e.name} (${e.role})`, id: e.id }))
+      );
+      setItems(
+        itemRes.data.map((i) => ({
+          label: `${i.name} (${formatCurrency(i.unitPrice)})`,
+          id: i.id,
+          unitPrice: i.unitPrice,
+        }))
+      );
     } catch (err) {
       console.error(err);
       setSnack({ open: true, severity: "error", msg: "Failed to load data" });
@@ -85,7 +107,10 @@ export default function Sales() {
   };
 
   const addDetail = () => {
-    setForm({ ...form, details: [...form.details, { itemId: null, quantity: 0, discount: 0 }] });
+    setForm({
+      ...form,
+      details: [...form.details, { itemId: null, quantity: 0, discount: 0 }],
+    });
   };
 
   const removeDetail = (index) => {
@@ -105,20 +130,31 @@ export default function Sales() {
 
   const handleAddCustomer = async () => {
     if (!newCustomer.name || !newCustomer.email) {
-      setSnack({ open: true, severity: "error", msg: "Name and email are required" });
+      setSnack({
+        open: true,
+        severity: "error",
+        msg: "Name and email are required",
+      });
       return;
     }
     setLoading(true);
     try {
       const res = await instance.post("/api/v1/customer", newCustomer);
-      setCustomers([...customers, { label: `${res.data.name} (${res.data.email})`, id: res.data.id }]);
+      setCustomers([
+        ...customers,
+        { label: `${res.data.name} (${res.data.email})`, id: res.data.id },
+      ]);
       setForm({ ...form, customerId: res.data.id });
       setOpenCustomerDialog(false);
       setNewCustomer({ name: "", email: "", phone: "", address: "" });
       setSnack({ open: true, severity: "success", msg: "Customer added" });
     } catch (err) {
       console.error(err);
-      setSnack({ open: true, severity: "error", msg: "Failed to add customer" });
+      setSnack({
+        open: true,
+        severity: "error",
+        msg: "Failed to add customer",
+      });
     } finally {
       setLoading(false);
     }
@@ -131,9 +167,20 @@ export default function Sales() {
     }
     setLoading(true);
     try {
-      await instance.post("/api/v1/order", { ...form, details: form.details.map(d => ({ ...d, quantity: Number(d.quantity), discount: Number(d.discount) })) });
+      await instance.post("/api/v1/order", {
+        ...form,
+        details: form.details.map((d) => ({
+          ...d,
+          quantity: Number(d.quantity),
+          discount: Number(d.discount),
+        })),
+      });
       setSnack({ open: true, severity: "success", msg: "Sale created" });
-      setForm({ customerId: null, employeeId: null, details: [{ itemId: null, quantity: 0, discount: 0 }] });
+      setForm({
+        customerId: null,
+        employeeId: null,
+        details: [{ itemId: null, quantity: 0, discount: 0 }],
+      });
       setTotal(0);
     } catch (err) {
       console.error(err);
@@ -147,18 +194,38 @@ export default function Sales() {
     <DashboardLayout title="Sales" menu={ownerMenu}>
       <Grow in timeout={500}>
         <Box sx={{ p: { xs: 2, md: 3 }, bgcolor: "#f9fafb", borderRadius: 2 }}>
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", display: "flex", alignItems: "center", color: "#1976d2" }}>
+          <Typography
+            variant="h5"
+            gutterBottom
+            sx={{
+              fontWeight: "bold",
+              display: "flex",
+              alignItems: "center",
+              color: "#1976d2",
+            }}
+          >
             <ShoppingCart sx={{ mr: 1 }} /> Create New Sale
           </Typography>
-          <Paper elevation={3} sx={{ p: { xs: 2, md: 3 }, borderRadius: 2, bgcolor: "#fff" }}>
+          <Paper
+            elevation={3}
+            sx={{ p: { xs: 2, md: 3 }, borderRadius: 2, bgcolor: "#fff" }}
+          >
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
-                <InputLabel sx={{ mb: 1, fontWeight: "bold" }}>Customer *</InputLabel>
+                <InputLabel sx={{ mb: 1, fontWeight: "bold" }}>
+                  Customer *
+                </InputLabel>
                 <Autocomplete
                   options={customers}
                   getOptionLabel={(option) => option.label}
                   onChange={handleCustomerChange}
-                  renderInput={(params) => <TextField {...params} placeholder="Search customer..." fullWidth />}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder="Search customer..."
+                      fullWidth
+                    />
+                  )}
                   fullWidth
                   aria-label="select customer"
                 />
@@ -172,28 +239,62 @@ export default function Sales() {
                 </Button>
               </Grid>
               <Grid item xs={12} md={6}>
-                <InputLabel sx={{ mb: 1, fontWeight: "bold" }}>Employee (Optional)</InputLabel>
+                <InputLabel sx={{ mb: 1, fontWeight: "bold" }}>
+                  Employee (Optional)
+                </InputLabel>
                 <Autocomplete
                   options={employees}
                   getOptionLabel={(option) => option.label}
                   onChange={handleEmployeeChange}
-                  renderInput={(params) => <TextField {...params} placeholder="Search employee..." fullWidth />}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder="Search employee..."
+                      fullWidth
+                    />
+                  )}
                   fullWidth
                   aria-label="select employee"
                 />
               </Grid>
             </Grid>
 
-            <Typography variant="subtitle1" sx={{ mt: 3, fontWeight: "bold" }}>Items</Typography>
+            <Typography variant="subtitle1" sx={{ mt: 3, fontWeight: "bold" }}>
+              Items
+            </Typography>
             {form.details.map((d, index) => (
-              <Paper key={index} variant="outlined" sx={{ p: 2, mt: 2, borderRadius: 2 }}>
+              <Paper
+                key={index}
+                variant="outlined"
+                sx={{ p: 2, mt: 2, borderRadius: 2 }}
+              >
                 <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={12} sm={4}>
+                  <Grid item xs={12} sm={6}>
                     <Autocomplete
                       options={items}
                       getOptionLabel={(option) => option.label}
-                      onChange={(e, newValue) => handleDetailItemChange(index, newValue)}
-                      renderInput={(params) => <TextField {...params} label="Item" fullWidth />}
+                      onChange={(e, newValue) =>
+                        handleDetailItemChange(index, newValue)
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Item"
+                          fullWidth
+                          sx={{
+                            minWidth: "300px", // Fits well on 24" without crowding
+                            "& .MuiInputBase-root": {
+                              fontSize: "1.1rem", // ~16-18px effective size
+                              padding: "10px 12px", // More breathing room
+                            },
+                            "& .MuiAutocomplete-option": {
+                              // Dropdown items
+                              fontSize: "1rem",
+                              minHeight: "48px", // Taller for easier selection
+                            },
+                          }}
+                        />
+                      )}
                       fullWidth
                       aria-label={`select item ${index + 1}`}
                     />
@@ -224,19 +325,39 @@ export default function Sales() {
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
-                    <IconButton onClick={() => removeDetail(index)} color="error" aria-label={`remove item ${index + 1}`}>
+                    <IconButton
+                      onClick={() => removeDetail(index)}
+                      color="error"
+                      aria-label={`remove item ${index + 1}`}
+                    >
                       <Remove />
                     </IconButton>
                   </Grid>
                 </Grid>
               </Paper>
             ))}
-            <Button onClick={addDetail} startIcon={<Add />} sx={{ mt: 2 }} variant="outlined" aria-label="add item">
+            <Button
+              onClick={addDetail}
+              startIcon={<Add />}
+              sx={{ mt: 2 }}
+              variant="outlined"
+              aria-label="add item"
+            >
               Add Item
             </Button>
 
-            <Box sx={{ mt: 3, p: 2, bgcolor: "#e3f2fd", borderRadius: 2, textAlign: "right" }}>
-              <Typography variant="h6" sx={{ fontWeight: "bold" }}>Total: {formatCurrency(total)}</Typography>
+            <Box
+              sx={{
+                mt: 3,
+                p: 2,
+                bgcolor: "#e3f2fd",
+                borderRadius: 2,
+                textAlign: "right",
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                Total: {formatCurrency(total)}
+              </Typography>
             </Box>
             <Button
               variant="contained"
@@ -252,14 +373,24 @@ export default function Sales() {
         </Box>
       </Grow>
 
-      <Dialog open={openCustomerDialog} onClose={() => setOpenCustomerDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={openCustomerDialog}
+        onClose={() => setOpenCustomerDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>Add New Customer</DialogTitle>
         <DialogContent>
           <TextField
             name="name"
             label="Name"
             value={newCustomer.name}
-            onChange={(e) => setNewCustomer({ ...newCustomer, [e.target.name]: e.target.value })}
+            onChange={(e) =>
+              setNewCustomer({
+                ...newCustomer,
+                [e.target.name]: e.target.value,
+              })
+            }
             fullWidth
             margin="normal"
             required
@@ -269,7 +400,12 @@ export default function Sales() {
             name="email"
             label="Email"
             value={newCustomer.email}
-            onChange={(e) => setNewCustomer({ ...newCustomer, [e.target.name]: e.target.value })}
+            onChange={(e) =>
+              setNewCustomer({
+                ...newCustomer,
+                [e.target.name]: e.target.value,
+              })
+            }
             fullWidth
             margin="normal"
             required
@@ -280,7 +416,12 @@ export default function Sales() {
             name="phone"
             label="Phone"
             value={newCustomer.phone}
-            onChange={(e) => setNewCustomer({ ...newCustomer, [e.target.name]: e.target.value })}
+            onChange={(e) =>
+              setNewCustomer({
+                ...newCustomer,
+                [e.target.name]: e.target.value,
+              })
+            }
             fullWidth
             margin="normal"
             aria-label="customer phone"
@@ -289,22 +430,43 @@ export default function Sales() {
             name="address"
             label="Address"
             value={newCustomer.address}
-            onChange={(e) => setNewCustomer({ ...newCustomer, [e.target.name]: e.target.value })}
+            onChange={(e) =>
+              setNewCustomer({
+                ...newCustomer,
+                [e.target.name]: e.target.value,
+              })
+            }
             fullWidth
             margin="normal"
             aria-label="customer address"
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenCustomerDialog(false)} aria-label="cancel">Cancel</Button>
-          <Button onClick={handleAddCustomer} variant="contained" disabled={loading} aria-label="save customer">
+          <Button
+            onClick={() => setOpenCustomerDialog(false)}
+            aria-label="cancel"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleAddCustomer}
+            variant="contained"
+            disabled={loading}
+            aria-label="save customer"
+          >
             Save
           </Button>
         </DialogActions>
       </Dialog>
 
-      <Snackbar open={snack.open} autoHideDuration={4000} onClose={() => setSnack({ ...snack, open: false })}>
-        <Alert severity={snack.severity} sx={{ width: "100%" }}>{snack.msg}</Alert>
+      <Snackbar
+        open={snack.open}
+        autoHideDuration={4000}
+        onClose={() => setSnack({ ...snack, open: false })}
+      >
+        <Alert severity={snack.severity} sx={{ width: "100%" }}>
+          {snack.msg}
+        </Alert>
       </Snackbar>
     </DashboardLayout>
   );

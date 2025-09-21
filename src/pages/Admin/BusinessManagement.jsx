@@ -198,7 +198,7 @@ export default function BusinessManagement() {
               sx={{
                 '& .MuiDataGrid-columnHeaders': {
                   bgcolor: 'primary.main',
-                  color: 'primary.contrastText',
+                  color: 'black',
                   fontWeight: 'bold',
                 },
                 '& .MuiDataGrid-row:hover': {
