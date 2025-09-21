@@ -22,7 +22,8 @@ import BusinessIcon from "@mui/icons-material/Business";
 import PeopleIcon from "@mui/icons-material/People";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { Link } from "react-router-dom";
-import { Dashboard as DashboardIcon, Inventory as ProductsIcon, People as CustomersIcon, LocalShipping as SuppliersIcon, Work as EmployeesIcon, PointOfSale as SalesIcon, Receipt as InvoicesIcon, MoneyOff as ExpensesIcon } from "@mui/icons-material";
+import { Dashboard as DashboardIcon, Inventory as ProductsIcon, People as CustomersIcon, LocalShipping as SuppliersIcon, Work as EmployeesIcon, PointOfSale as SalesIcon, Receipt as InvoicesIcon, MoneyOff as ExpensesIcon, Assessment as ReportsIcon, SmartToy as AssistantIcon
+} from "@mui/icons-material";
 
 const drawerWidth = 220;
 
@@ -37,6 +38,9 @@ const iconForName = (name) => {
   if (/invoices/i.test(name)) return <InvoicesIcon />;
   if (/expenses/i.test(name)) return <ExpensesIcon />;
   if (/setting/i.test(name)) return <SettingsIcon />;
+  if (/business/i.test(name)) return <BusinessIcon />;
+  if (/reports/i.test(name)) return <ReportsIcon />;
+  if (/assistant|ai/i.test(name)) return <AssistantIcon />;
   return <HomeIcon />;
 };
 
