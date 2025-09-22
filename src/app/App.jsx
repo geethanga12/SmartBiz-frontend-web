@@ -31,6 +31,10 @@ import instance from "../service/AxiosOrder";
 
 import SubscriptionPlans from "../pages/Admin/SubscriptionPlans";
 
+import AIUsageLogs from "../pages/Admin/AIUsageLogs";
+import UsageLogs from "../pages/Admin/UsageLogs";
+import SystemStatistics from "../pages/Admin/SystemStatistics";
+
 export default function App() {
   const [checking, setChecking] = useState(true);
   const navigate = useNavigate();
@@ -206,6 +210,33 @@ export default function App() {
         />
 
         {/* Admin routes */}
+
+        <Route
+          path="/admin/ai-usage-logs"
+          element={
+            <ProtectedRoute roles={["ADMIN"]}>
+              <AIUsageLogs />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/usage-logs"
+          element={
+            <ProtectedRoute roles={["ADMIN"]}>
+              <UsageLogs />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/system-statistics"
+          element={
+            <ProtectedRoute roles={["ADMIN"]}>
+              <SystemStatistics />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/admin/subscription-plans"

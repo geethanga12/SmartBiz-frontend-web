@@ -1,4 +1,4 @@
-// src/service/subscriptionService.js
+// src/service/subscriptionService.jsx
 import instance from "./AxiosOrder";
 
 const base = "/api/v1/subscription-plans";
@@ -14,7 +14,25 @@ export const subscriptionService = {
   // Public
   getPublicPlans: async () => (await instance.get(`${base}/public`)).data,
 
-  // Assign plan to business
-  assignPlan: async (planId, businessId) =>
-    (await instance.post(`${base}/${planId}/assign/${businessId}`)).data,
+  // UPDATED: Assign plan to business (fixed endpoint)
+  assignPlan: async (planId, businessId) => {
+    try {
+      const response = await instance.post(`${base}/${planId}/assign/${businessId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error in assignPlan:', error);
+      throw error;
+    }
+  },
+
+  // NEW: Admin assign plan alternative endpoint
+  adminAssignPlan: async (planId, businessId) => {
+    try {
+      const response = await instance.post(`/api/v1/admin/business/${businessId}/assign-plan/${planId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error in adminAssignPlan:', error);
+      throw error;
+    }
+  }
 };

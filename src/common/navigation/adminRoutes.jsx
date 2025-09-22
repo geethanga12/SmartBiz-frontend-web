@@ -5,5 +5,8 @@ export const adminMenu = [
   { path: "/admin/businesses", name: "Businesses" },
   { path: "/admin/usage-logs", name: "Usage Logs" },
   { path: "/admin/settings", name: "Settings" },
-  { path: "/admin/subscription-plans", name: "Subscription Plans" }, // new
+  { path: "/admin/subscription-plans", name: "Subscription Plans" },
+  { path: "/admin/ai-usage-logs", name: "AI Usage Logs" },
+  { path: "/admin/usage-logs", name: "Usage Logs" },
+  { path: "/admin/system-statistics", name: "System Statistics" }
 ];
