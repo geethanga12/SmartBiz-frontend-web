@@ -1,52 +1,46 @@
-// File: src/pages/Admin/BusinessManagement.jsx (NEW)
+// src/pages/Admin/BusinessManagement.jsx
 import React, { useEffect, useState } from 'react';
 import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Grid,
-  Chip,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Avatar,
-  IconButton,
-  Button
+  Box, Typography, Card, CardContent, Grid, Chip, Paper, Table, TableBody,
+  TableCell, TableContainer, TableHead, TableRow, Avatar, IconButton, Button,
+  Dialog, DialogTitle, DialogContent, DialogActions, Select, MenuItem,
+  FormControl, InputLabel, Snackbar, Alert
 } from '@mui/material';
 import { 
-  Business,
-  Person,
-  Email,
-  LocationOn,
-  CalendarToday,
-  Visibility
+  Business, Person, Email, LocationOn, CalendarToday, Visibility, Assignment
 } from '@mui/icons-material';
 import { DataGrid } from '@mui/x-data-grid';
 import DashboardLayout from '../../common/DashboardLayout';
 import { adminMenu } from '../../common/navigation/adminRoutes';
 import { adminService } from '../../service/adminService';
+import { subscriptionService } from '../../service/subscriptionService';
 
 export default function BusinessManagement() {
   const [businesses, setBusinesses] = useState([]);
+  const [subscriptionPlans, setSubscriptionPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBusiness, setSelectedBusiness] = useState(null);
+  const [assignDialog, setAssignDialog] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState('');
+  const [businessToAssign, setBusinessToAssign] = useState(null);
+  const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' });
 
   useEffect(() => {
-    fetchBusinesses();
+    fetchData();
   }, []);
 
-  const fetchBusinesses = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await adminService.getAllBusinesses();
-      setBusinesses(data);
+      const [businessData, plansData] = await Promise.all([
+        adminService.getAllBusinesses(),
+        subscriptionService.getAll()
+      ]);
+      setBusinesses(businessData);
+      setSubscriptionPlans(plansData);
     } catch (error) {
-      console.error('Error fetching businesses:', error);
+      console.error('Error fetching data:', error);
+      setSnack({ open: true, message: 'Failed to load data', severity: 'error' });
     } finally {
       setLoading(false);
     }
@@ -54,6 +48,26 @@ export default function BusinessManagement() {
 
   const handleViewBusiness = (business) => {
     setSelectedBusiness(business);
+  };
+
+  const handleAssignPlan = (business) => {
+    setBusinessToAssign(business);
+    setSelectedPlanId(business.subscriptionPlanId || '');
+    setAssignDialog(true);
+  };
+
+  const handleConfirmAssign = async () => {
+    if (!selectedPlanId || !businessToAssign) return;
+
+    try {
+      await subscriptionService.assignPlan(selectedPlanId, businessToAssign.businessId);
+      setSnack({ open: true, message: 'Subscription plan assigned successfully!', severity: 'success' });
+      setAssignDialog(false);
+      fetchData(); // Refresh data
+    } catch (error) {
+      console.error('Error assigning plan:', error);
+      setSnack({ open: true, message: 'Failed to assign subscription plan', severity: 'error' });
+    }
   };
 
   const columns = [
@@ -82,7 +96,19 @@ export default function BusinessManagement() {
         </Box>
       )
     },
-    { field: 'address', headerName: 'Address', width: 250 },
+    { 
+      field: 'subscriptionPlanName', 
+      headerName: 'Subscription', 
+      width: 150,
+      renderCell: (params) => (
+        <Chip
+          label={params.value || 'No Plan'}
+          color={params.value ? 'primary' : 'default'}
+          size="small"
+        />
+      )
+    },
+    { field: 'address', headerName: 'Address', width: 200 },
     { 
       field: 'status', 
       headerName: 'Status', 
@@ -98,20 +124,22 @@ export default function BusinessManagement() {
     { 
       field: 'registerDate', 
       headerName: 'Registered', 
-      width: 180,
+      width: 150,
       valueFormatter: (value) => new Date(value).toLocaleDateString('en-LK')
     },
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 100,
+      width: 150,
       renderCell: (params) => (
-        <IconButton
-          color="primary"
-          onClick={() => handleViewBusiness(params.row)}
-        >
-          <Visibility />
-        </IconButton>
+        <>
+          <IconButton color="primary" onClick={() => handleViewBusiness(params.row)} title="View Details">
+            <Visibility />
+          </IconButton>
+          <IconButton color="secondary" onClick={() => handleAssignPlan(params.row)} title="Assign Plan">
+            <Assignment />
+          </IconButton>
+        </>
       ),
     },
   ];
@@ -163,10 +191,10 @@ export default function BusinessManagement() {
             <Card>
               <CardContent>
                 <Typography variant="h6" color="warning.main">
-                  {businesses.filter(b => b.status === 'PENDING').length}
+                  {businesses.filter(b => b.subscriptionPlanName).length}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Pending Approval
+                  With Subscriptions
                 </Typography>
               </CardContent>
             </Card>
@@ -175,10 +203,10 @@ export default function BusinessManagement() {
             <Card>
               <CardContent>
                 <Typography variant="h6" color="info.main">
-                  {new Date().toLocaleDateString('en-LK')}
+                  {businesses.filter(b => !b.subscriptionPlanName).length}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Today's Date
+                  No Subscription
                 </Typography>
               </CardContent>
             </Card>
@@ -233,6 +261,14 @@ export default function BusinessManagement() {
                 <Typography><strong>Owner ID:</strong> {selectedBusiness.ownerId}</Typography>
                 <Typography><strong>Owner Email:</strong> {selectedBusiness.ownerEmail}</Typography>
                 <Typography><strong>Registered:</strong> {new Date(selectedBusiness.registerDate).toLocaleDateString('en-LK')}</Typography>
+                <Typography><strong>Subscription:</strong> 
+                  <Chip 
+                    label={selectedBusiness.subscriptionPlanName || 'No Plan'} 
+                    color={selectedBusiness.subscriptionPlanName ? 'primary' : 'default'}
+                    size="small"
+                    sx={{ ml: 1 }}
+                  />
+                </Typography>
               </Grid>
             </Grid>
             <Button 
@@ -244,6 +280,85 @@ export default function BusinessManagement() {
             </Button>
           </Paper>
         )}
+
+        {/* Assign Subscription Dialog */}
+        <Dialog open={assignDialog} onClose={() => setAssignDialog(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>
+            Assign Subscription Plan
+          </DialogTitle>
+          <DialogContent>
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body1" gutterBottom>
+                Business: <strong>{businessToAssign?.businessName}</strong>
+              </Typography>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Owner: {businessToAssign?.ownerEmail}
+              </Typography>
+              
+              <FormControl fullWidth sx={{ mt: 3 }}>
+                <InputLabel>Select Subscription Plan</InputLabel>
+                <Select
+                  value={selectedPlanId}
+                  onChange={(e) => setSelectedPlanId(e.target.value)}
+                  label="Select Subscription Plan"
+                >
+                  <MenuItem value="">
+                    <em>No Plan</em>
+                  </MenuItem>
+                  {subscriptionPlans
+                    .filter(plan => plan.isActive)
+                    .map((plan) => (
+                    <MenuItem key={plan.planId} value={plan.planId}>
+                      {plan.planName} - ${plan.monthlyPrice}/month
+                      {plan.aiFeatures && ' (AI Features)'}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Show plan details */}
+              {selectedPlanId && (
+                <Paper sx={{ mt: 2, p: 2, bgcolor: 'grey.50' }}>
+                  {(() => {
+                    const plan = subscriptionPlans.find(p => p.planId.toString() === selectedPlanId.toString());
+                    return plan ? (
+                      <Box>
+                        <Typography variant="subtitle2">Plan Details:</Typography>
+                        <Typography variant="body2">Price: ${plan.monthlyPrice}/month</Typography>
+                        <Typography variant="body2">Max Users: {plan.maxUsers}</Typography>
+                        <Typography variant="body2">Max Products: {plan.maxProducts}</Typography>
+                        <Typography variant="body2">Max Orders: {plan.maxOrders}</Typography>
+                        <Typography variant="body2">AI Features: {plan.aiFeatures ? 'Yes' : 'No'}</Typography>
+                        <Typography variant="body2" sx={{ mt: 1 }}>{plan.features}</Typography>
+                      </Box>
+                    ) : null;
+                  })()}
+                </Paper>
+              )}
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setAssignDialog(false)}>Cancel</Button>
+            <Button 
+              variant="contained" 
+              onClick={handleConfirmAssign}
+              disabled={!selectedPlanId}
+            >
+              Assign Plan
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Snackbar */}
+        <Snackbar
+          open={snack.open}
+          autoHideDuration={4000}
+          onClose={() => setSnack({ ...snack, open: false })}
+        >
+          <Alert severity={snack.severity} sx={{ width: '100%' }}>
+            {snack.message}
+          </Alert>
+        </Snackbar>
       </Box>
     </DashboardLayout>
   );
